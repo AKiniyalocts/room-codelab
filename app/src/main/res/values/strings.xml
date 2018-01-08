@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">codelab-room</string>
+    <string name="action_settings">Settings</string>
+    <string name="add_a_word">Add a word...</string>
+</resources>
