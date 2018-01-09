@@ -1,6 +1,5 @@
 package com.akiniyalocts.codelab_room.view
 
-import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.databinding.DataBindingUtil
 import android.os.Bundle
@@ -8,10 +7,14 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.view.inputmethod.EditorInfo
 import com.akiniyalocts.codelab_room.R
+import com.akiniyalocts.codelab_room.RoomApplication
 import com.akiniyalocts.codelab_room.WordViewModel
 import com.akiniyalocts.codelab_room.databinding.MainActivityBinding
 import com.akiniyalocts.codelab_room.model.Word
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
+import org.threeten.bp.Instant
 
 class MainActivity : AppCompatActivity() {
 
@@ -39,7 +42,7 @@ class MainActivity : AppCompatActivity() {
                 val text = v.text.toString()
 
                 if(text.isNotEmpty()){
-                    viewmodel.insert(Word(text))
+                    viewmodel.insert(Word(text, Instant.now()))
                 }
 
                 v.text = null
@@ -50,10 +53,10 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-        viewmodel.words.observe(this, Observer<List<Word>> {
-            it?.let {
-                adapter.update(it)
-            }
-        })
+        RoomApplication.db?.wordDao()?.getAllWords()?.subscribeOn(Schedulers.io())
+                ?.observeOn(AndroidSchedulers.mainThread())
+                ?.subscribe { words -> adapter.update(words) }
+
+
     }
 }
